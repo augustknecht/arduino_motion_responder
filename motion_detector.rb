@@ -8,11 +8,8 @@ class MotionDetector < ArduinoSketch
   def loop
     motion_in = analogRead sensor
     serial_println motion_in
-    if (motion_in > 500)
-      digitalWrite(motion, true)
-    else
-      digitalWrite(motion, false)
-    end
+    
+    digitalWrite(motion, motion_in > 500)
     delay 100
   end
     
