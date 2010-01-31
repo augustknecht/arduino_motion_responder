@@ -4,56 +4,65 @@ require 'serialport'
 module DataReceiver
   extend self
   
-  # 0 = People not here
-  # 1 = People here
-  @previous_state = 0
-  @expire_timer = Time.new
-  
   def read_loop
-    sp = SerialPort.new "/dev/tty.usbserial-A70061BP", 9600
-  
-    while true do
-      if(is_motion?(sp.readline.to_i))
+    initialization
+    sp = SerialPort.new @config["serial"], @config["baud_rate"]
+    
+    loop do
+      if(motion_detected?(sp))
         new_motion
       else
         check_expiration
       end
+      
+      # So we don't eat up processor cycles
+      sleep 0.01
     end
   end
   
-  def is_motion?(sensor_reading)
-    sensor_reading > 500 # May need to be calibrated
+  def initialization
+    @config = read_config("#{File.dirname(__FILE__)}/config.yml")
+    @someone_was_here = false
+    @expire_timer = Time.new
   end
   
-  def over_threshhold?
-    (Time.new - @expire_timer) > 10
+  def read_config(file)
+    YAML.load_file(file)["config"]
+  end
+  
+  def motion_detected?(sp)
+    sp.read_nonblock(1) rescue false
+  end
+  
+  def new_motion
+    reset_timer
+    arrival_actions if !@someone_was_here
   end
   
   def reset_timer
     @expire_timer = Time.new
   end
   
-  def new_motion
-    arrival_actions if @previous_state == 0
-    reset_timer
+  def check_expiration
+    departure_actions if (over_threshhold? && @someone_was_here)
   end
   
-  def check_expiration
-    departure_actions if (over_threshhold? && @previous_state == 1)
+  def over_threshhold?
+    (Time.new - @expire_timer) > @config["expire_time"]
   end
   
   def arrival_actions
-    @previous_state = 1
-    execute_file_by_line("arrival_actions")
+    @someone_was_here = true
+    execute_file_by_line("#{File.dirname(__FILE__)}/arrival_actions")
   end
   
   def departure_actions
-    @previous_state = 0
-    execute_file_by_line("departure_actions")
+    @someone_was_here = false
+    execute_file_by_line("#{File.dirname(__FILE__)}/departure_actions")
   end
   
   def execute_file_by_line(file)
-    puts "Executing file #{file}..."
+    puts "Executing file #{file}... #{Time.now}"
     f = File.open(file) or die "Unable to open file #{file}!"
     f.each_line { |line| system(line) }
   end

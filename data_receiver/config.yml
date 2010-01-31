@@ -1,0 +1,4 @@
+config:
+  serial: "/dev/tty.usbserial-A70061BP"
+  baud_rate: 9600
+  expire_time: 10
