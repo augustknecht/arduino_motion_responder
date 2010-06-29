@@ -18,7 +18,7 @@ In _config.yml_, specify the serial device, baud rate (default is 9600), and the
 circuit
 -----------------
 
-![Motion detector circuit](circuit_diagram.png "Motion detector circuit")
+![Motion detector circuit](http://github.com/augustknecht/arduino_motion_responder/raw/master/circuit_diagram.png "Motion detector circuit")
 
 This circuit is built on the arduino using a protoshield, LED, resistor, and a basic [PIR Sensor Module]("http://www.radioshack.com/product/index.jsp?productId=2906724") from Radio Shack.
 
@@ -26,7 +26,7 @@ license
 -------
 (uiuc/ncsa open source license)
 
-    Copyright (c) 2009 Will Leinweber.  All rights reserved.
+    Copyright (c) 2009 August Knecht.  All rights reserved.
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to
